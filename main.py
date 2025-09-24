@@ -2,6 +2,11 @@ import time
 import asyncio
 from telethon.sync import TelegramClient
 from telethon import errors
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from the .env file
+load_dotenv()
 
 class TelegramForwarder:
     def __init__(self, api_id, api_hash, phone_number):
@@ -29,7 +34,6 @@ class TelegramForwarder:
         for dialog in dialogs:
             print(f"Chat ID: {dialog.id}, Title: {dialog.title}")
             chats_file.write(f"Chat ID: {dialog.id}, Title: {dialog.title} \n")
-          
 
         print("List of groups printed successfully!")
 
@@ -59,11 +63,10 @@ class TelegramForwarder:
 
                         print("Message forwarded")
                 else:
-                        # Forward the message to the destination channel
-                        await self.client.send_message(destination_channel_id, message.text)
+                    # Forward the message to the destination channel
+                    await self.client.send_message(destination_channel_id, message.text)
 
-                        print("Message forwarded")
-
+                    print("Message forwarded")
 
                 # Update the last message ID
                 last_message_id = max(last_message_id, message.id)
@@ -72,37 +75,21 @@ class TelegramForwarder:
             await asyncio.sleep(5)  # Adjust the delay time as needed
 
 
-# Function to read credentials from file
-def read_credentials():
-    try:
-        with open("credentials.txt", "r") as file:
-            lines = file.readlines()
-            api_id = lines[0].strip()
-            api_hash = lines[1].strip()
-            phone_number = lines[2].strip()
-            return api_id, api_hash, phone_number
-    except FileNotFoundError:
-        print("Credentials file not found.")
-        return None, None, None
+# Function to get credentials from environment variables
+def get_credentials():
+    api_id = os.getenv('API_ID')
+    api_hash = os.getenv('API_HASH')
+    phone_number = os.getenv('PHONE_NUMBER')
 
-# Function to write credentials to file
-def write_credentials(api_id, api_hash, phone_number):
-    with open("credentials.txt", "w") as file:
-        file.write(api_id + "\n")
-        file.write(api_hash + "\n")
-        file.write(phone_number + "\n")
+    return api_id, api_hash, phone_number
 
 async def main():
-    # Attempt to read credentials from file
-    api_id, api_hash, phone_number = read_credentials()
+    # Attempt to get credentials from environment variables
+    api_id, api_hash, phone_number = get_credentials()
 
-    # If credentials not found in file, prompt the user to input them
-    if api_id is None or api_hash is None or phone_number is None:
-        api_id = input("Enter your API ID: ")
-        api_hash = input("Enter your API Hash: ")
-        phone_number = input("Enter your phone number: ")
-        # Write credentials to file for future use
-        write_credentials(api_id, api_hash, phone_number)
+    if not api_id or not api_hash or not phone_number:
+        print("Missing required credentials. Please check your .env file.")
+        return
 
     forwarder = TelegramForwarder(api_id, api_hash, phone_number)
     
