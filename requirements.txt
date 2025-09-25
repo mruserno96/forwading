@@ -1,2 +1,4 @@
-telethon
-python-dotenv
+https://github.com/KurimuzonAkuma/pyrogram/archive/v2.1.21.zip
+sewar
+opencv-python
+deep_translator
